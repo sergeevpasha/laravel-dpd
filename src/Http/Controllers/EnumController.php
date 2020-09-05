@@ -17,7 +17,7 @@ class EnumController
      */
     public function countries(): JsonResponse
     {
-        return response()->json(CountryType::toArray());
+        return response()->json(CountryType::asArray());
     }
 
     /**
@@ -27,6 +27,6 @@ class EnumController
      */
     public function services(): JsonResponse
     {
-        return response()->json(ServiceType::toArray());
+        return response()->json(ServiceType::asArray());
     }
 }

@@ -2,7 +2,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/52ea85ccfbc7d77dee10/test_coverage)](https://codeclimate.com/github/sergeevpasha/laravel-dpd/test_coverage)
 [![CodeFactor](https://www.codefactor.io/repository/github/sergeevpasha/laravel-dpd/badge)](https://www.codefactor.io/repository/github/sergeevpasha/laravel-dpd)
 [![Generic badge](https://img.shields.io/badge/PHP-^7.4.*-blue.svg)](https://www.php.net)
-[![Generic badge](https://img.shields.io/badge/Laravel-^6.0-red.svg)](https://laravel.com)
+[![Generic badge](https://img.shields.io/badge/Laravel-^7.0-red.svg)](https://laravel.com)
 
 # Laravel DPD API Wrapper
 Allows you to:

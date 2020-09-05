@@ -35,7 +35,7 @@ class EnumControllerTest extends TestCase
         $method = $this->controller->countries();
         $this->assertInstanceOf(JsonResponse::class, $method);
         $this->assertEqualsCanonicalizing(
-            json_encode(CountryType::toArray()),
+            json_encode(CountryType::asArray()),
             $method->content()
         );
     }
@@ -45,7 +45,7 @@ class EnumControllerTest extends TestCase
         $method = $this->controller->services();
         $this->assertInstanceOf(JsonResponse::class, $method);
         $this->assertEqualsCanonicalizing(
-            json_encode(ServiceType::toArray()),
+            json_encode(ServiceType::asArray()),
             $method->content()
         );
     }

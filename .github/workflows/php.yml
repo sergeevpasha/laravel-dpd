@@ -13,12 +13,7 @@ jobs:
     strategy:
       matrix:
         php: ['7.4']
-        laravel: [6.*, 7.*]
-        include:
-          - laravel: 6.*
-            testbench: 4.*
-          - laravel: 7.*
-            testbench: 5.*
+        laravel: [7.*]
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
     steps:
@@ -38,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" -n --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" -n --no-update
           composer update --prefer-stable --prefer-dist -n --no-suggest
 
       - name: Execute tests (Unit and Feature tests) via PHPUnit
