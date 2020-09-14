@@ -2,7 +2,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/52ea85ccfbc7d77dee10/test_coverage)](https://codeclimate.com/github/sergeevpasha/laravel-dpd/test_coverage)
 [![CodeFactor](https://www.codefactor.io/repository/github/sergeevpasha/laravel-dpd/badge)](https://www.codefactor.io/repository/github/sergeevpasha/laravel-dpd)
 [![Generic badge](https://img.shields.io/badge/PHP-^7.4.*-blue.svg)](https://www.php.net)
-[![Generic badge](https://img.shields.io/badge/Laravel-^7.0-red.svg)](https://laravel.com)
+[![Generic badge](https://img.shields.io/badge/Laravel-^8.0-red.svg)](https://laravel.com)
 
 # Laravel DPD API Wrapper
 Allows you to:
@@ -15,7 +15,7 @@ Allows you to:
 
 ## No Database required
 
-If you did a research of DPD API you must know, that they suppose you to fetch data files with cities, terminals and streets and manage all of it by your own. However, with this package, there is no need for that.
+If you did research of DPD API you must know, that they suppose you to fetch data files with cities, terminals and streets and manage all of it by your own. However, with this package, there is no need for that.
 
 ## Pre-requirements
 You need to get DPD API key, user, login and password.
@@ -47,7 +47,7 @@ php artisan vendor:publish --provider="SergeevPasha\DPD\Providers\DPDServiceProv
 Now you can change routes prefix and middleware to whatever you need
 
 ### Use Case #1
-After installing you may just import the client
+After installing, you may just import the client
 <pre>use SergeevPasha\DPD\Libraries\DPDClient;</pre>
 Firstly let's initialize and get a session. Session is required for a few methods.
 <pre>
@@ -106,7 +106,7 @@ KG - Kyrgyzstan
 ## Available services
 If you need to specify a service you need to use one of these codes:
 <pre>
- public const BZP = '18:00';
+    BZP = '18:00';
     ECN - ECONOMY
     ECU - ECONOMY CU
     CUR - CLASSIC
@@ -122,7 +122,7 @@ If you need to specify a service you need to use one of these codes:
 
 ### Use Case #2
 
-There are some predefined routes, that will be merged with your routes aswell. You may check it by using
+There are some predefined routes, that will be merged with your routes as well. You may check it by using
 <pre>php artisan routes:list</pre>
-It actually exposing the same methods to the routes, so it should be pretty clear on how to use it.
-For more information on how to use it, please check out `src/` folder
+It actually exposes the same methods to the routes, so it should be pretty clear on how to use it.
+For more information on how to use it, please check out `src/` folder.
