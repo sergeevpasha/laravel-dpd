@@ -15,7 +15,7 @@ class AuthDPDController
      *
      * @var \SergeevPasha\DPD\Libraries\DPDClient
      */
-    private $client;
+    private DPDClient $client;
 
     public function __construct(DPDClient $client)
     {
@@ -25,6 +25,8 @@ class AuthDPDController
     /**
      * Authorize DPD User
      *
+     * @throws \Illuminate\Validation\ValidationException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(): JsonResponse

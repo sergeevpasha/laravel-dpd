@@ -22,27 +22,28 @@ class DPDController
      *
      * @var \SergeevPasha\DPD\Libraries\DPDClient
      */
-    private $client;
+    private DPDClient $client;
 
     public function __construct(DPDClient $client)
     {
         $this->client = $client;
     }
-    
+
     /**
      * Check if required key is isset and fail if not
      *
-     * @param  array<mixed> $data
-     * @param  string $key
+     * @param array<mixed>|null  $data
+     * @param string|null $key
+     *
+     * @throws \Exception
      * @return array<mixed>
-     * @throws Exception
      */
-    public function responseOrFail(array $data, string $key = null): array
+    public function responseOrFail(?array $data, string $key = null): array
     {
         $response = [];
         if ($key) {
             if (!isset($data[$key])) {
-                throw new Exception();
+                throw new Exception('Missing required parameters or session ID is expired');
             }
             $response['data'] = $data[$key];
         } else {
@@ -50,10 +51,14 @@ class DPDController
         }
         return $response;
     }
+
     /**
      * Query City.
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDQueryCityRequest $request
+     *
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Illuminate\Http\JsonResponse
      */
     public function queryCity(DPDQueryCityRequest $request): JsonResponse
@@ -66,9 +71,11 @@ class DPDController
     /**
      * Query Street.
      *
-     * @param int $city
+     * @param int                                                   $city
      * @param \SergeevPasha\DPD\Http\Requests\DPDQueryStreetRequest $request
      *
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Illuminate\Http\JsonResponse
      */
     public function queryStreet(int $city, DPDQueryStreetRequest $request): JsonResponse
@@ -83,6 +90,8 @@ class DPDController
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointCityRequest $request
      *
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Illuminate\Http\JsonResponse
      */
     public function queryReceivePointCity(DPDQueryReceivePointCityRequest $request): JsonResponse
@@ -91,12 +100,14 @@ class DPDController
         $response = $this->responseOrFail($data);
         return response()->json($response);
     }
-    
+
     /**
      * Query Terminal City.
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointsRequest $request
      *
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Illuminate\Http\JsonResponse
      */
     public function getReceivePoints(DPDQueryReceivePointsRequest $request): JsonResponse
@@ -111,6 +122,8 @@ class DPDController
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDTerminalRequest $request
      *
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Illuminate\Http\JsonResponse
      */
     public function getTerminals(DPDTerminalRequest $request): JsonResponse
@@ -119,12 +132,13 @@ class DPDController
         $response = $this->responseOrFail($data);
         return response()->json($response);
     }
-    
+
     /**
      * Calculate delivery.
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDCalculatePriceRequest $request
      *
+     * @throws \Exception
      * @return \Illuminate\Http\JsonResponse
      */
     public function calculateDeliveryPrice(DPDCalculatePriceRequest $request): JsonResponse

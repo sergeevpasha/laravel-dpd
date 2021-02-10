@@ -70,6 +70,7 @@ class Delivery extends DataTransferObject
      *
      * @param array<mixed> $data
      *
+     * @throws \BenSampo\Enum\Exceptions\InvalidEnumKeyException
      * @return self
      */
     public static function fromArray(array $data): self

@@ -34,13 +34,13 @@ This package has a few configuration values:
 'prefix'     => 'dpd',
 'middleware' => ['web']
 </pre>
-If you only need to use DPDClient, you may completely skip this configuration. Otherwise you can use default options and specify some data in .env file:
+If you only need to use DPDClient, you may completely skip this configuration. Otherwise, you can use default options and specify some data in .env file:
 * DPD_KEY
 * DPD_USER
 * DPD_LOGIN
 * DPD_PASSWORD
 
-To make full use of predefined routes, you will need to publish config:
+To make full use of predefined routes, you will need to publish the config:
 <pre>
 php artisan vendor:publish --provider="SergeevPasha\DPD\Providers\DPDServiceProvider" --tag="config"
 </pre>
