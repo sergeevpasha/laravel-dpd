@@ -23,7 +23,7 @@ class AuthDPDControllerTest extends TestCase
         $method = $class->__invoke();
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
-    
+
     public function testInvokeAuthorizationFails()
     {
         $client = Mockery::mock(DPDClient::class);

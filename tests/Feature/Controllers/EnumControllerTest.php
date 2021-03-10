@@ -39,7 +39,7 @@ class EnumControllerTest extends TestCase
             $method->content()
         );
     }
-    
+
     public function testServices()
     {
         $method = $this->controller->services();

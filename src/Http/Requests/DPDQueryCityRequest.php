@@ -16,7 +16,7 @@ class DPDQueryCityRequest extends FormRequest
     public function rules()
     {
         return [
-            'query' => ['required', 'string'],
+            'query'        => ['required', 'string'],
             'country_code' => ['required', 'string'],
         ];
     }

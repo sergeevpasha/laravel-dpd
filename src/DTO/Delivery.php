@@ -14,7 +14,7 @@ class Delivery extends DataTransferObject
      * @var int
      */
     public int $arrivalCityId;
-    
+
     /**
      * @var int
      */
@@ -49,7 +49,7 @@ class Delivery extends DataTransferObject
      * @var string|null
      */
     public ?string $pickupDate;
-    
+
     /**
      * @var int|null
      */
@@ -75,21 +75,23 @@ class Delivery extends DataTransferObject
      */
     public static function fromArray(array $data): self
     {
-        return new self([
-            'arrivalCityId'     => (int) $data['arrival_city_id'],
-            'derivalCityId'     => (int) $data['derival_city_id'],
-            'arrivalTerminal'   => (bool) $data['arrival_terminal'],
-            'derivalTerminal'   => (bool) $data['derival_terminal'],
-            'parcelTotalWeight' => (float) $data['parcel_total_weight'],
-            'parcelTotalVolume' => isset($data['parcel_total_volume']) ? (float) $data['parcel_total_volume'] : null,
-            'parcelTotalValue'  => isset($data['parcel_total_value']) ? (float) $data['parcel_total_value'] : null,
-            'pickupDate'        => isset($data['pickup_date']) ? $data['pickup_date'] : null,
-            'maxDeliveryDays'   => isset($data['max_delivery_days']) ? (int) $data['max_delivery_days'] : null,
-            'maxDeliveryPrice'  => isset($data['max_delivery_price']) ? (float) $data['max_delivery_price'] : null,
-            'services'          =>
-                isset($data['services']) ?
-                array_map(fn(string $item) => ServiceType::fromKey(Str::upper($item)), $data['services']) :
-                null,
-        ]);
+        return new self(
+            [
+                'arrivalCityId'     => (int) $data['arrival_city_id'],
+                'derivalCityId'     => (int) $data['derival_city_id'],
+                'arrivalTerminal'   => (bool) $data['arrival_terminal'],
+                'derivalTerminal'   => (bool) $data['derival_terminal'],
+                'parcelTotalWeight' => (float) $data['parcel_total_weight'],
+                'parcelTotalVolume' => isset($data['parcel_total_volume']) ? (float) $data['parcel_total_volume'] : null,
+                'parcelTotalValue'  => isset($data['parcel_total_value']) ? (float) $data['parcel_total_value'] : null,
+                'pickupDate'        => isset($data['pickup_date']) ? $data['pickup_date'] : null,
+                'maxDeliveryDays'   => isset($data['max_delivery_days']) ? (int) $data['max_delivery_days'] : null,
+                'maxDeliveryPrice'  => isset($data['max_delivery_price']) ? (float) $data['max_delivery_price'] : null,
+                'services'          =>
+                    isset($data['services']) ?
+                        array_map(fn(string $item) => ServiceType::fromKey(Str::upper($item)), $data['services']) :
+                        null,
+            ]
+        );
     }
 }

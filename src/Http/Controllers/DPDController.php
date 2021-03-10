@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 
 declare(strict_types=1);
 
@@ -8,6 +9,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use SergeevPasha\DPD\DTO\Delivery;
 use SergeevPasha\DPD\Libraries\DPDClient;
+use Illuminate\Validation\ValidationException;
 use SergeevPasha\DPD\Http\Requests\DPDTerminalRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryCityRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryStreetRequest;
@@ -32,8 +34,8 @@ class DPDController
     /**
      * Check if required key is isset and fail if not
      *
-     * @param array<mixed>|null  $data
-     * @param string|null $key
+     * @param array<mixed>|null $data
+     * @param string|null       $key
      *
      * @throws \Exception
      * @return array<mixed>
@@ -47,7 +49,9 @@ class DPDController
             }
             $response['data'] = $data[$key];
         } else {
-            $response['data'] = $data;
+            foreach ($data as $row) {
+                $response['data'][] = $row;
+            }
         }
         return $response;
     }
@@ -63,7 +67,7 @@ class DPDController
      */
     public function queryCity(DPDQueryCityRequest $request): JsonResponse
     {
-        $data = $this->client->findCity($request->query('query'), $request->query('country_code'));
+        $data     = $this->client->findCity($request->query('query'), $request->query('country_code'));
         $response = $this->responseOrFail($data, 'geonames');
         return response()->json($response);
     }
@@ -80,7 +84,7 @@ class DPDController
      */
     public function queryStreet(int $city, DPDQueryStreetRequest $request): JsonResponse
     {
-        $data = $this->client->findCityStreet($city, $request->query('query'), $request->query('session_id'));
+        $data     = $this->client->findCityStreet($city, $request->query('query'), $request->query('session_id'));
         $response = $this->responseOrFail($data, 'streetList');
         return response()->json($response);
     }
@@ -96,13 +100,13 @@ class DPDController
      */
     public function queryReceivePointCity(DPDQueryReceivePointCityRequest $request): JsonResponse
     {
-        $data = $this->client->findReceivePointCity($request->query('query'));
+        $data     = $this->client->findReceivePointCity($request->query('query'));
         $response = $this->responseOrFail($data);
         return response()->json($response);
     }
 
     /**
-     * Query Terminal City.
+     * Query Receive Points.
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointsRequest $request
      *
@@ -112,7 +116,7 @@ class DPDController
      */
     public function getReceivePoints(DPDQueryReceivePointsRequest $request): JsonResponse
     {
-        $data = $this->client->getReceivePoints($request->query('bounds'), $request->query('city'));
+        $data     = $this->client->getReceivePoints($request->query('bounds'), $request->query('city'));
         $response = $this->responseOrFail($data);
         return response()->json($response);
     }
@@ -128,7 +132,7 @@ class DPDController
      */
     public function getTerminals(DPDTerminalRequest $request): JsonResponse
     {
-        $data = $this->client->getTerminals($request->query('bounds'), $request->query('city'));
+        $data     = $this->client->getTerminals($request->query('bounds'), $request->query('city'));
         $response = $this->responseOrFail($data);
         return response()->json($response);
     }
@@ -138,14 +142,21 @@ class DPDController
      *
      * @param \SergeevPasha\DPD\Http\Requests\DPDCalculatePriceRequest $request
      *
-     * @throws \Exception
+     * @throws \BenSampo\Enum\Exceptions\InvalidEnumKeyException
+     * @throws \Illuminate\Validation\ValidationException
      * @return \Illuminate\Http\JsonResponse
      */
     public function calculateDeliveryPrice(DPDCalculatePriceRequest $request): JsonResponse
     {
         $delivery = Delivery::fromArray($request->all());
-        $data = $this->client->getPrice($delivery);
-        $response = $this->responseOrFail($data, 'return');
-        return response()->json($response);
+        try {
+            $data     = $this->client->getPrice($delivery);
+            $response = $this->responseOrFail($data, 'return');
+            return response()->json($response);
+        } catch (Exception $exception) {
+            throw ValidationException::withMessages(
+                [$exception->detail->ServiceCostFault2->code => $exception->detail->ServiceCostFault2->message]
+            );
+        }
     }
 }

@@ -17,7 +17,7 @@ class DPDQueryReceivePointsRequest extends FormRequest
     {
         return [
             'bounds' => ['required', 'string'],
-            'city' => ['required', 'string'],
+            'city'   => ['required', 'string'],
         ];
     }
 }

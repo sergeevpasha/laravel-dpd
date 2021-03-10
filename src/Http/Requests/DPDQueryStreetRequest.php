@@ -17,7 +17,7 @@ class DPDQueryStreetRequest extends FormRequest
     {
         return [
             'session_id' => ['required', 'string'],
-            'query' => ['required', 'string'],
+            'query'      => ['required', 'string'],
         ];
     }
 }

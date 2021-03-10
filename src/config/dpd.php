@@ -11,10 +11,10 @@ return [
     |
     */
 
-    'key'      => env('DPD_KEY', null),
-    'user'     => env('DPD_USER', null),
-    'login'    => env('DPD_LOGIN', null),
-    'password' => env('DPD_PASSWORD', null),
+    'key'        => env('DPD_KEY', null),
+    'user'       => env('DPD_USER', null),
+    'login'      => env('DPD_LOGIN', null),
+    'password'   => env('DPD_PASSWORD', null),
     'prefix'     => 'dpd',
     'middleware' => ['web'],
 

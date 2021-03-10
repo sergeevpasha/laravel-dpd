@@ -18,9 +18,9 @@ class DPDServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/dpd.php', 'dpd');
-        $this->app->singleton(DPDClient::class, fn () => new DPDClient(config('dpd.user'), config('dpd.key')));
+        $this->app->singleton(DPDClient::class, fn() => new DPDClient(config('dpd.user'), config('dpd.key')));
     }
-    
+
     /**
      * Bootstrap services.
      *
@@ -31,12 +31,15 @@ class DPDServiceProvider extends ServiceProvider
         $this->registerRoutes();
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'dpd');
         if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__ . '/../config/dpd.php' => config_path('dpd.php'),
-            ], 'config');
+            $this->publishes(
+                [
+                    __DIR__ . '/../config/dpd.php' => config_path('dpd.php'),
+                ],
+                'config'
+            );
         }
     }
-    
+
     /**
      * Register routes
      *
@@ -44,11 +47,14 @@ class DPDServiceProvider extends ServiceProvider
      */
     protected function registerRoutes(): void
     {
-        Route::group($this->routeConfiguration(), function () {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-        });
+        Route::group(
+            $this->routeConfiguration(),
+            function () {
+                $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            }
+        );
     }
-    
+
     /**
      * Routes Configuration
      *
@@ -57,7 +63,7 @@ class DPDServiceProvider extends ServiceProvider
     protected function routeConfiguration(): array
     {
         return [
-            'prefix' => config('dpd.prefix'),
+            'prefix'     => config('dpd.prefix'),
             'middleware' => config('dpd.middleware'),
         ];
     }

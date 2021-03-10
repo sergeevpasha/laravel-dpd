@@ -92,7 +92,15 @@ class DPDClient
     private function findMagicValue(): void
     {
         $realCityId    = 48994107;
-        $currentCities = $this->findCity('Екатеринбург', '3');
+        $response      = $this->request(
+            'https://www.dpd.ru/ols/calc/cities.do2',
+            [
+                'name_startsWith' => 'Екатеринбург',
+                'country'         => '3',
+            ],
+            null
+        );
+        $currentCities = json_decode($response->getBody()->getContents(), true);
         if ($currentCities) {
             $this->currentMagicValue = $realCityId - $currentCities['geonames'][0]['id'];
         } else {
@@ -144,6 +152,7 @@ class DPDClient
      */
     public function findCity(string $query, string $country): ?array
     {
+        $this->findMagicValue();
         /* Here we get cities without passing a session ID. That's very important */
         $response = $this->request(
             'https://www.dpd.ru/ols/calc/cities.do2',
@@ -153,7 +162,17 @@ class DPDClient
             ],
             null
         );
-        return json_decode($response->getBody()->getContents(), true);
+        $data     = json_decode($response->getBody()->getContents(), true);
+        /*
+            We gonna add magic value to all cities ID, that's the tricky part,
+            if we would get cities with Session we would not be able to get
+            the true cities ID, as long as they are generated using some of
+            its values. Without session we can just add magic value.
+        */
+        foreach ($data['geonames'] as $key => $city) {
+            $data['geonames'][$key]['id'] = (int) $city['id'] + $this->currentMagicValue;
+        }
+        return $data;
     }
 
     /**
@@ -168,11 +187,10 @@ class DPDClient
      */
     public function findCityStreet(int $city, string $query, string $session): ?array
     {
-        $this->findMagicValue();
         $response = $this->request(
             'https://www.dpd.ru/ols/order/addressStreetAutocomplete.do2',
             [
-                'cityId'     => $city + $this->currentMagicValue,
+                'cityId'     => $city,
                 'streetName' => $query,
             ],
             $session
@@ -218,6 +236,7 @@ class DPDClient
                 'city'   => $city,
             ],
             null,
+            'POST',
             'query'
         );
         return json_decode($answer->getBody()->getContents(), true);
@@ -250,29 +269,21 @@ class DPDClient
      *
      * @param \SergeevPasha\DPD\DTO\Delivery $delivery
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return array<mixed>|null
      */
     public function getPrice(Delivery $delivery): ?array
     {
-        $this->findMagicValue();
-        $soap = new SoapClient('http://ws.dpd.ru/services/calculator2?wsdl');
-        /*
-            We gonna add magic value to all cities ID, that's the tricky part,
-            if we would get cities with Session we would not be able to get
-            the true cities ID, as long as they are generated using some of
-            its values. Without session we can just subtract magic value.
-        */
+        $soap               = new SoapClient('http://ws.dpd.ru/services/calculator2?wsdl');
         $data               = [
             'auth'          => [
                 'clientNumber' => $this->user,
                 'clientKey'    => $this->key
             ],
             'pickup'        => [
-                'cityId' => $delivery->derivalCityId + $this->currentMagicValue,
+                'cityId' => $delivery->derivalCityId,
             ],
             'delivery'      => [
-                'cityId' => $delivery->arrivalCityId + $this->currentMagicValue,
+                'cityId' => $delivery->arrivalCityId,
             ],
             'selfPickup'    => $delivery->derivalTerminal,
             'selfDelivery'  => $delivery->arrivalTerminal,

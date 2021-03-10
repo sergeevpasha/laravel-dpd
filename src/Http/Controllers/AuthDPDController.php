@@ -33,10 +33,12 @@ class AuthDPDController
     {
         $session = $this->client->authorize();
         if (!$session) {
-            throw ValidationException::withMessages([
-                'login' => trans('dpd::messages.invalid', ['attribute' => 'login']),
-                'password'   => trans('dpd::messages.invalid', ['attribute' => 'password'])
-            ]);
+            throw ValidationException::withMessages(
+                [
+                    'login'    => trans('dpd::messages.invalid', ['attribute' => 'login']),
+                    'password' => trans('dpd::messages.invalid', ['attribute' => 'password'])
+                ]
+            );
         }
         $response = [
             'message' => trans('dpd::messages.success_login'),

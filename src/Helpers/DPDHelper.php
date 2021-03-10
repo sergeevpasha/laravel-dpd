@@ -10,7 +10,8 @@ class DPDHelper
     /**
      * Remove null values from an array recursively
      *
-     * @param  array<mixed> $haystack
+     * @param array<mixed> $haystack
+     *
      * @return array<mixed>
      */
     public static function removeNullValues(array $haystack): array

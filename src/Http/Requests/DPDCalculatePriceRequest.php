@@ -16,18 +16,18 @@ class DPDCalculatePriceRequest extends FormRequest
     public function rules()
     {
         return [
-            'arrival_city_id' => ['required', 'string'],
-            'derival_city_id' => ['required', 'string'],
-            'arrival_terminal' => ['required', 'boolean'],
-            'derival_terminal' => ['required', 'boolean'],
-            'parcel_total_weight' => ['required', 'numeric'],
-            'parcel_total_volume' => ['sometimes', 'required', 'numeric'],
-            'parcel_total_value' => ['sometimes', 'required', 'numeric'],
-            'services' => ['sometimes', 'required', 'array'],
-            'services.*' => ['sometimes', 'required', 'string'],
-            'pickup_date' => ['sometimes', 'required', 'string'],
-            'max_delivery_days' => ['sometimes', 'required', 'string'],
-            'max_delivery_price' => ['sometimes', 'required', 'string']
+            'arrival_city_id'     => ['required', 'string'],
+            'derival_city_id'     => ['required', 'string'],
+            'arrival_terminal'    => ['required', 'boolean'],
+            'derival_terminal'    => ['required', 'boolean'],
+            'parcel_total_weight' => ['required', 'numeric', 'min:0.01'],
+            'parcel_total_volume' => ['sometimes', 'required', 'numeric', 'min:0.01'],
+            'parcel_total_value'  => ['sometimes', 'required', 'numeric', 'min:0.01'],
+            'services'            => ['sometimes', 'required', 'array'],
+            'services.*'          => ['sometimes', 'required', 'string'],
+            'pickup_date'         => ['sometimes', 'required', 'string'],
+            'max_delivery_days'   => ['sometimes', 'required', 'string'],
+            'max_delivery_price'  => ['sometimes', 'required', 'string']
         ];
     }
 }
