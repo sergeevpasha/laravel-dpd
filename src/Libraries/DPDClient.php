@@ -258,7 +258,7 @@ class DPDClient
         if (is_array($data)) {
             $terminals = array_filter(
                 $data,
-                fn($array) => $array['workAsPocht'] === 0 && $array['workAsPvp'] === 0 && $array['cityName'] === $city
+                fn($array) => $array['departmentType'] === 'Т'
             );
         }
         return $terminals;
