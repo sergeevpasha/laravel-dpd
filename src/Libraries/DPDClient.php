@@ -204,9 +204,9 @@ class DPDClient
      * @param string $query
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array<mixed>|null
+     * @return array<mixed>
      */
-    public function findReceivePointCity(string $query): ?array
+    public function findReceivePointCity(string $query): array
     {
         $answer = $this->request(
             'https://chooser.dpd.ru/api/geocode',
@@ -215,7 +215,8 @@ class DPDClient
             ],
             null
         );
-        return json_decode($answer->getBody()->getContents(), true);
+
+        return json_decode($answer->getBody()->getContents(), true) ?: [];
     }
 
     /**
@@ -258,7 +259,7 @@ class DPDClient
         if (is_array($data)) {
             $terminals = array_filter(
                 $data,
-                fn($array) => $array['departmentType'] === 'Т'
+                fn($array) => in_array($array['departmentType'], ['Т', 'СД'])
             );
         }
         return $terminals;
