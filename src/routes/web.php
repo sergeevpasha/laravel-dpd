@@ -19,6 +19,8 @@ Route::get('/terminals', [DPDController::class, 'getTerminals'])
     ->name('dpd.terminals');
 Route::post('/calculate', [DPDController::class, 'calculateDeliveryPrice'])
     ->name('dpd.calculate');
+Route::get('/tracks', [DPDController::class, 'findByTrackNumber'])
+    ->name('dpd.find');
 
 Route::get('/countries', [EnumController::class, 'countries'])
     ->name('dpd.countries');

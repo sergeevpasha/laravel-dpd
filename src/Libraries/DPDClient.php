@@ -58,7 +58,7 @@ class DPDClient
          */
         $response = $this->request('https://www.dpd.ru/ols/order/order.do2', [], null, 'GET');
         $headers  = $response->getHeaders();
-        $cookies  = isset($headers['Set-Cookie']) ? $headers['Set-Cookie'] : [];
+        $cookies  = $headers['Set-Cookie'] ?? [];
         $session  = null;
         foreach ($cookies as $cookie) {
             $basicChunks = explode(';', $cookie);
@@ -70,7 +70,7 @@ class DPDClient
             }
         }
         if ($session) {
-            /* That's the tricky part, if we have our session we are now able to login with our credentials */
+            /* That's the tricky part, if we have our session we are now able to log in with our credentials */
             $this->request(
                 'https://www.dpd.ru/ols/etc/logon.do2',
                 [
@@ -111,11 +111,11 @@ class DPDClient
     /**
      * Send request to DPD API.
      *
-     * @param string       $path
-     * @param array<mixed> $params
-     * @param string|null  $session
-     * @param string       $method
-     * @param string       $type
+     * @param string      $path
+     * @param array       $params
+     * @param string|null $session
+     * @param string      $method
+     * @param string      $type
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @return \Psr\Http\Message\ResponseInterface
@@ -148,7 +148,7 @@ class DPDClient
      * @param string $country
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array<mixed>|null
+     * @return array|null
      */
     public function findCity(string $query, string $country): ?array
     {
@@ -164,10 +164,10 @@ class DPDClient
         );
         $data     = json_decode($response->getBody()->getContents(), true);
         /*
-            We gonna add magic value to all cities ID, that's the tricky part,
+            We're going to add magic value to all cities ID, that's the tricky part,
             if we would get cities with Session we would not be able to get
             the true cities ID, as long as they are generated using some of
-            its values. Without session we can just add magic value.
+            its values. Without session, we can just add magic value.
         */
         foreach ($data['geonames'] as $key => $city) {
             $data['geonames'][$key]['id'] = (int) $city['id'] + $this->currentMagicValue;
@@ -183,7 +183,7 @@ class DPDClient
      * @param string $session
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array<mixed>|null
+     * @return array|null
      */
     public function findCityStreet(int $city, string $query, string $session): ?array
     {
@@ -199,12 +199,12 @@ class DPDClient
     }
 
     /**
-     * Find a Receive Point City
+     * Find Receive Point City
      *
      * @param string $query
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array<mixed>
+     * @return array
      */
     public function findReceivePointCity(string $query): array
     {
@@ -226,7 +226,7 @@ class DPDClient
      * @param string $city
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array<mixed>|null
+     * @return array|null
      */
     public function getReceivePoints(string $bounds, string $city): ?array
     {
@@ -250,7 +250,7 @@ class DPDClient
      * @param string $city
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array<mixed>|null
+     * @return array|null
      */
     public function getTerminals(string $bounds, string $city): ?array
     {
@@ -270,7 +270,7 @@ class DPDClient
      *
      * @param \SergeevPasha\DPD\DTO\Delivery $delivery
      *
-     * @return array<mixed>|null
+     * @return array|null
      */
     public function getPrice(Delivery $delivery): ?array
     {
@@ -299,6 +299,32 @@ class DPDClient
         $request['request'] = $data;
         /* @phpstan-ignore-next-line */
         $result = $soap->getServiceCost2($request);
+        return (array) $result;
+    }
+
+    /**
+     * Find track by number
+     *
+     * @param string $trackNumber
+     *
+     * @return array
+     */
+    public function findByTrackNumber(string $trackNumber): array
+    {
+        $soap               = new SoapClient('http://ws.dpd.ru/services/tracing1-1?wsdl');
+        $data               = [
+            'auth'       => [
+                'clientNumber' => $this->user,
+                'clientKey'    => $this->key
+            ],
+            'dpdOrderNr' => $trackNumber
+        ];
+        $request['request'] = $data;
+        $states             = $soap->getStatesByDPDOrder($request);
+
+        $result           = end($states->return->states);
+        $result->newState = trans("dpd::dpd_statuses.$result->newState");
+
         return (array) $result;
     }
 }

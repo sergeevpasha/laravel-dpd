@@ -1,4 +1,5 @@
 <?php
+
 /** @noinspection PhpPossiblePolymorphicInvocationInspection */
 
 declare(strict_types=1);
@@ -14,6 +15,7 @@ use SergeevPasha\DPD\Http\Requests\DPDTerminalRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryCityRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryStreetRequest;
 use SergeevPasha\DPD\Http\Requests\DPDCalculatePriceRequest;
+use SergeevPasha\DPD\Http\Requests\DPDFindByTrackNumberRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointsRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointCityRequest;
 
@@ -34,11 +36,11 @@ class DPDController
     /**
      * Check if required key is isset and fail if not
      *
-     * @param array<mixed>|null $data
-     * @param string|null       $key
+     * @param array|null  $data
+     * @param string|null $key
      *
      * @throws \Exception
-     * @return array<mixed>
+     * @return array
      */
     public function responseOrFail(?array $data, string $key = null): array
     {
@@ -153,6 +155,27 @@ class DPDController
             $data     = $this->client->getPrice($delivery);
             $response = $this->responseOrFail($data, 'return');
             return response()->json($response);
+        } catch (Exception $exception) {
+            throw ValidationException::withMessages(
+                [$exception->detail->ServiceCostFault2->code => $exception->detail->ServiceCostFault2->message]
+            );
+        }
+    }
+
+    /**
+     * Find track by number.
+     *
+     * @param \SergeevPasha\DPD\Http\Requests\DPDFindByTrackNumberRequest $request
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function findByTrackNumber(DPDFindByTrackNumberRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        try {
+            $data = $this->client->findByTrackNumber($data['number']);
+            return response()->json($data);
         } catch (Exception $exception) {
             throw ValidationException::withMessages(
                 [$exception->detail->ServiceCostFault2->code => $exception->detail->ServiceCostFault2->message]
