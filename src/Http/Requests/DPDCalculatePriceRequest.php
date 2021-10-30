@@ -11,7 +11,7 @@ class DPDCalculatePriceRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<mixed>
+     * @return array
      */
     public function rules()
     {

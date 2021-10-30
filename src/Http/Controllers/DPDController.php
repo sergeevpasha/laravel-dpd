@@ -155,10 +155,12 @@ class DPDController
             $data     = $this->client->getPrice($delivery);
             $response = $this->responseOrFail($data, 'return');
             return response()->json($response);
+        // @codeCoverageIgnoreStart
         } catch (Exception $exception) {
             throw ValidationException::withMessages(
                 [$exception->detail->ServiceCostFault2->code => $exception->detail->ServiceCostFault2->message]
             );
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -172,14 +174,16 @@ class DPDController
      */
     public function findByTrackNumber(DPDFindByTrackNumberRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        $data = $request->all();
         try {
             $data = $this->client->findByTrackNumber($data['number']);
             return response()->json($data);
+        // @codeCoverageIgnoreStart
         } catch (Exception $exception) {
             throw ValidationException::withMessages(
                 [$exception->detail->ServiceCostFault2->code => $exception->detail->ServiceCostFault2->message]
             );
+            // @codeCoverageIgnoreEnd
         }
     }
 }

@@ -14,6 +14,7 @@ use SergeevPasha\DPD\Http\Requests\DPDTerminalRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryCityRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryStreetRequest;
 use SergeevPasha\DPD\Http\Requests\DPDCalculatePriceRequest;
+use SergeevPasha\DPD\Http\Requests\DPDFindByTrackNumberRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointsRequest;
 use SergeevPasha\DPD\Http\Requests\DPDQueryReceivePointCityRequest;
 
@@ -25,10 +26,10 @@ class DPDControllerTest extends TestCase
      * @var array
      */
     protected array $defaultResponse = [
-        'data' => 'text',
-        'geonames' => 'text',
+        'data'       => 'text',
+        'geonames'   => 'text',
         'streetList' => 'text',
-        'return' => 'text',
+        'return'     => 'text',
     ];
 
     /**
@@ -53,29 +54,32 @@ class DPDControllerTest extends TestCase
         $client->shouldReceive('getReceivePoints')->andReturn($this->defaultResponse);
         $client->shouldReceive('getTerminals')->andReturn($this->defaultResponse);
         $client->shouldReceive('getPrice')->andReturn($this->defaultResponse);
+        $client->shouldReceive('findByTrackNumber')->andReturn($this->defaultResponse);
         $this->app->instance(DPDClient::class, $client);
         $this->controller = $this->app->make(DPDController::class);
     }
 
     public function testQueryCity()
     {
-        $request = new DPDQueryCityRequest([
-            'query'        => 'string',
-            'country_code' => 'string',
-        ]);
-        $method = $this->controller->queryCity($request);
+        $request = new DPDQueryCityRequest(
+            [
+                'query'        => 'string',
+                'country_code' => 'string',
+            ]
+        );
+        $method  = $this->controller->queryCity($request);
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
 
     public function testResponseOrFail()
     {
-        $request = [
+        $request  = [
             'value' => 'text',
         ];
         $expected = [
             'data' => 'text'
         ];
-        $result = $this->controller->responseOrFail($request, 'value');
+        $result   = $this->controller->responseOrFail($request, 'value');
         $this->assertEqualsCanonicalizing($expected, $result);
         $this->expectException(Exception::class);
         $this->controller->responseOrFail([], 'text');
@@ -83,61 +87,82 @@ class DPDControllerTest extends TestCase
 
     public function testQueryStreet()
     {
-        $request = new DPDQueryStreetRequest([
-            'session_id' => 'string',
-            'query'      => 'string',
-        ]);
-        $method = $this->controller->queryStreet(1, $request);
+        $request = new DPDQueryStreetRequest(
+            [
+                'session_id' => 'string',
+                'query'      => 'string',
+            ]
+        );
+        $method  = $this->controller->queryStreet(1, $request);
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
 
     public function testQueryReceivePointCity()
     {
-        $request = new DPDQueryReceivePointCityRequest([
-            'query' => 'string',
-        ]);
-        $method = $this->controller->queryReceivePointCity($request);
+        $request = new DPDQueryReceivePointCityRequest(
+            [
+                'query' => 'string',
+            ]
+        );
+        $method  = $this->controller->queryReceivePointCity($request);
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
 
     public function testGetReceivePoints()
     {
-        $request = new DPDQueryReceivePointsRequest([
-            'bounds' => 'string',
-            'city'   => 'string',
-        ]);
-        $method = $this->controller->getReceivePoints($request);
+        $request = new DPDQueryReceivePointsRequest(
+            [
+                'bounds' => 'string',
+                'city'   => 'string',
+            ]
+        );
+        $method  = $this->controller->getReceivePoints($request);
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
 
     public function testGetTerminals()
     {
-        $request = new DPDTerminalRequest([
-            'bounds' => 'string',
-            'city'   => 'string',
-        ]);
-        $method = $this->controller->getTerminals($request);
+        $request = new DPDTerminalRequest(
+            [
+                'bounds' => 'string',
+                'city'   => 'string',
+            ]
+        );
+        $method  = $this->controller->getTerminals($request);
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
 
     public function testCalculateDeliveryPrice()
     {
-        $request = new DPDCalculatePriceRequest([
-            'arrival_city_id'     => 'string',
-            'derival_city_id'     => 'string',
-            'arrival_terminal'    => '1',
-            'derival_terminal'    => '0',
-            'parcel_total_weight' => '10',
-            'parcel_total_volume' => '0.1',
-            'parcel_total_value'  => '100',
-            'services'            => [
-                'BZP'
-            ],
-            'pickup_date'         => 'string',
-            'max_delivery_days'   => 'string',
-            'max_delivery_price'  => 'string',
-        ]);
-        $method = $this->controller->calculateDeliveryPrice($request);
+        $request = new DPDCalculatePriceRequest(
+            [
+                'arrival_city_id'     => 'string',
+                'derival_city_id'     => 'string',
+                'arrival_terminal'    => '1',
+                'derival_terminal'    => '0',
+                'parcel_total_weight' => '10',
+                'parcel_total_volume' => '0.1',
+                'parcel_total_value'  => '100',
+                'services'            => [
+                    'BZP'
+                ],
+                'pickup_date'         => 'string',
+                'max_delivery_days'   => 'string',
+                'max_delivery_price'  => 'string',
+            ]
+        );
+        $method  = $this->controller->calculateDeliveryPrice($request);
+        $this->assertInstanceOf(JsonResponse::class, $method);
+    }
+
+    public function testFindByTrackNumber()
+    {
+        $request = new DPDFindByTrackNumberRequest(
+            [
+                'number' => 'string',
+            ]
+        );
+        $method  = $this->controller->findByTrackNumber($request);
         $this->assertInstanceOf(JsonResponse::class, $method);
     }
 }

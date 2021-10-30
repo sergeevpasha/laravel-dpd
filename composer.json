@@ -50,9 +50,9 @@
     "scripts": {
         "lint": "@php ./vendor/bin/phpcs ./src ./tests --standard=PSR12 -d memory_limit=512M --colors -p",
         "fix": "@php ./vendor/bin/phpcbf ./src ./tests --standard=PSR12 -d memory_limit=512M --colors -p",
-        "test-html": "./vendor/bin/phpunit -d memory_limit=512M --coverage-html ./coverage --color=always",
+        "test-html": "XDEBUG_MODE=coverage ./vendor/bin/phpunit -d memory_limit=512M --coverage-html ./coverage --color=always",
         "analyse": "./vendor/bin/phpstan analyse ./src --level=6",
         "test": "./vendor/bin/phpunit -d memory_limit=512M --no-coverage --color=always",
-        "test-cover": "./vendor/bin/phpunit -d memory_limit=512M --color=always --coverage-clover ./coverage.xml"
+        "test-cover": "XDEBUG_MODE=coverage ./vendor/bin/phpunit -d memory_limit=512M --color=always --coverage-clover ./coverage.xml"
     }
 }
