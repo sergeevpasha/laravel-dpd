@@ -6,13 +6,12 @@ namespace SergeevPasha\DPD\Helpers;
 
 class DPDHelper
 {
-
     /**
      * Remove null values from an array recursively
      *
-     * @param array<mixed> $haystack
+     * @param array $haystack
      *
-     * @return array<mixed>
+     * @return array
      */
     public static function removeNullValues(array $haystack): array
     {

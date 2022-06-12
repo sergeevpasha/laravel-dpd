@@ -1,13 +1,13 @@
 {
     "name": "sergeevpasha/laravel-dpd",
-    "description": "DPD API wrapper for Laravel",
+    "description": "Tiny DPD API wrapper for Laravel",
     "keywords": ["dpd", "laravel"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Sergeev Pavel",
-            "email": "pasha_sergeev@live.ru",
+            "email": "sergeevpasha90@gmail.com",
             "homepage": "https://github.com/sergeevpasha"
         }
     ],
@@ -17,7 +17,7 @@
         "laravel/framework": "^8.40.0",
         "guzzlehttp/guzzle": "^7.0",
         "bensampo/laravel-enum": "^3.0",
-        "spatie/data-transfer-object": "^2.5",
+        "spatie/data-transfer-object": "^3.7",
         "ext-soap": "*",
         "ext-json": "*"
     },

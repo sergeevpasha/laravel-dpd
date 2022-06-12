@@ -4,277 +4,90 @@ declare(strict_types=1);
 
 namespace SergeevPasha\DPD\Libraries;
 
-use Exception;
-use SoapClient;
-use GuzzleHttp\Cookie\CookieJar;
-use SergeevPasha\DPD\DTO\Delivery;
-use GuzzleHttp\Client as GuzzleClient;
-use Psr\Http\Message\ResponseInterface;
+use SergeevPasha\DPD\DTO\CityDto;
+use SergeevPasha\DPD\DTO\DeliveryDto;
+use SergeevPasha\DPD\DTO\TerminalDto;
+use SergeevPasha\DPD\DTO\TrackingDto;
 use SergeevPasha\DPD\Helpers\DPDHelper;
+use SergeevPasha\DPD\DTO\DeliveryPriceOptionDto;
+use SergeevPasha\DPD\DTO\Collections\CityDtoCollection;
+use SergeevPasha\DPD\DTO\Collections\TerminalDtoCollection;
+use SergeevPasha\DPD\DTO\Collections\DeliveryPriceOptionDtoCollection;
 
 class DPDClient
 {
-    /**
-     * Value to add to the result city ID
-     *
-     * @var int
-     */
-    private int $currentMagicValue;
+    public const PRODUCTION_URL = 'https://ws.dpd.ru/';
+    public const TEST_URL       = 'https://wstest.dpd.ru/';
 
-    /**
-     * DPD User.
-     *
-     * @var string
-     */
     private string $user;
-
-    /**
-     * DPD App key.
-     *
-     * @var string
-     */
     private string $key;
+    private string $url;
 
-    public function __construct(string $user, string $key)
+    public function __construct(string $user, string $key, bool $testing = false)
     {
         $this->user = $user;
         $this->key  = $key;
+        $this->url  = $testing ? self::TEST_URL : self::PRODUCTION_URL;
     }
 
     /**
-     * Authorize a User.
-     *
-     * @param string|null $login
-     * @param string|null $password
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return string|null
-     */
-    public function authorize(?string $login = null, ?string $password = null): ?string
-    {
-        /*
-            We need to send a request that will return our DPD Session ID.
-            We are not required to send auth data yet
-         */
-        $response = $this->request('https://www.dpd.ru/ols/order/order.do2', [], null, 'GET');
-        $headers  = $response->getHeaders();
-        $cookies  = $headers['Set-Cookie'] ?? [];
-        $session  = null;
-        foreach ($cookies as $cookie) {
-            $basicChunks = explode(';', $cookie);
-            foreach ($basicChunks as $basicChunk) {
-                $generalChunks = explode('=', $basicChunk);
-                if ($generalChunks[0] === 'MYDPDSessionID') {
-                    $session = $generalChunks[1];
-                }
-            }
-        }
-        if ($session) {
-            /* That's the tricky part, if we have our session we are now able to log in with our credentials */
-            $this->request(
-                'https://www.dpd.ru/ols/etc/logon.do2',
-                [
-                    'username' => $login ?? config('dpd.login'),
-                    'password' => $password ?? config('dpd.password'),
-                ],
-                $session
-            );
-        }
-        return $session;
-    }
-
-    /**
-     * Find Magic value
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
-     */
-    private function findMagicValue(): void
-    {
-        $realCityId    = 48994107;
-        $response      = $this->request(
-            'https://www.dpd.ru/ols/calc/cities.do2',
-            [
-                'name_startsWith' => 'Екатеринбург',
-                'country'         => '3',
-            ],
-            null
-        );
-        $currentCities = json_decode($response->getBody()->getContents(), true);
-        if ($currentCities) {
-            $this->currentMagicValue = $realCityId - $currentCities['geonames'][0]['id'];
-        } else {
-            throw new Exception('Failed to connect to DPD Server');
-        }
-    }
-
-    /**
-     * Send request to DPD API.
-     *
-     * @param string      $path
-     * @param array       $params
-     * @param string|null $session
-     * @param string      $method
-     * @param string      $type
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    private function request(
-        string $path,
-        array $params,
-        ?string $session,
-        string $method = 'POST',
-        string $type = 'form_params'
-    ): ResponseInterface {
-        $options = [
-            $type         => $params,
-            'http_errors' => false,
-        ];
-        if ($session) {
-            $options['cookies'] = CookieJar::fromArray(['MYDPDSessionID' => $session], 'www.dpd.ru');
-        } else {
-            $options['cookies'] = new CookieJar();
-        }
-        $client = new GuzzleClient();
-        return $client->request($method, $path, $options);
-    }
-
-
-    /**
-     * Find a city by query string.
-     *
-     * @param string $query
      * @param string $country
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|null
+     * @throws \SoapFault
+     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @return \SergeevPasha\DPD\DTO\Collections\CityDtoCollection
      */
-    public function findCity(string $query, string $country): ?array
+    public function getCountryCities(string $country): CityDtoCollection
     {
-        $this->findMagicValue();
-        /* Here we get cities without passing a session ID. That's very important */
-        $response = $this->request(
-            'https://www.dpd.ru/ols/calc/cities.do2',
-            [
-                'name_startsWith' => $query,
-                'country'         => $country,
+        $soap = new SoapService($this->url . 'services/geography2?wsdl');
+
+        $data   = [
+            'auth'        => [
+                'clientNumber' => $this->user,
+                'clientKey'    => $this->key
             ],
-            null
+            'countryCode' => $country
+        ];
+        $result = $soap->getCitiesCashPay(['request' => $data]);
+        $cities = !isset($result->return[0]) ? [] : $result->return;
+        return new CityDtoCollection(array_map(fn($city) => new CityDto((array) $city), $cities));
+    }
+
+    /**
+     * @throws \SoapFault
+     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @return \SergeevPasha\DPD\DTO\Collections\TerminalDtoCollection
+     */
+    public function getTerminals(): TerminalDtoCollection
+    {
+        $soap = new SoapService($this->url . 'services/geography2?wsdl');
+
+        $request   = [
+            'auth' => [
+                'clientNumber' => $this->user,
+                'clientKey'    => $this->key
+            ]
+        ];
+        $result    = $soap->getTerminalsSelfDelivery2($request);
+        $terminals = !isset($result->return->terminal) ? [] : $result->return->terminal;
+        return new TerminalDtoCollection(
+            array_map(
+                fn($terminal) => new TerminalDto(json_decode(json_encode($terminal), true)),
+                $terminals
+            )
         );
-        $data     = json_decode($response->getBody()->getContents(), true);
-        /*
-            We're going to add magic value to all cities ID, that's the tricky part,
-            if we would get cities with Session we would not be able to get
-            the true cities ID, as long as they are generated using some of
-            its values. Without session, we can just add magic value.
-        */
-        foreach ($data['geonames'] as $key => $city) {
-            $data['geonames'][$key]['id'] = (int) $city['id'] + $this->currentMagicValue;
-        }
-        return $data;
     }
 
     /**
-     * Find a street by query string and City ID.
+     * @param \SergeevPasha\DPD\DTO\DeliveryDto $delivery
      *
-     * @param int    $city
-     * @param string $query
-     * @param string $session
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|null
+     * @throws \SoapFault
+     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @return \SergeevPasha\DPD\DTO\Collections\DeliveryPriceOptionDtoCollection
      */
-    public function findCityStreet(int $city, string $query, string $session): ?array
+    public function getPrice(DeliveryDto $delivery): DeliveryPriceOptionDtoCollection
     {
-        $response = $this->request(
-            'https://www.dpd.ru/ols/order/addressStreetAutocomplete.do2',
-            [
-                'cityId'     => $city,
-                'streetName' => $query,
-            ],
-            $session
-        );
-        return json_decode($response->getBody()->getContents(), true);
-    }
-
-    /**
-     * Find Receive Point City
-     *
-     * @param string $query
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array
-     */
-    public function findReceivePointCity(string $query): array
-    {
-        $answer = $this->request(
-            'https://chooser.dpd.ru/api/geocode',
-            [
-                'value' => $query,
-            ],
-            null
-        );
-
-        return json_decode($answer->getBody()->getContents(), true) ?: [];
-    }
-
-    /**
-     * Find City Receive Points
-     *
-     * @param string $bounds
-     * @param string $city
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|null
-     */
-    public function getReceivePoints(string $bounds, string $city): ?array
-    {
-        $answer = $this->request(
-            'https://chooser.dpd.ru/api',
-            [
-                'bounds' => $bounds,
-                'city'   => $city,
-            ],
-            null,
-            'POST',
-            'query'
-        );
-        return json_decode($answer->getBody()->getContents(), true);
-    }
-
-    /**
-     * Get City Terminals
-     *
-     * @param string $bounds
-     * @param string $city
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|null
-     */
-    public function getTerminals(string $bounds, string $city): ?array
-    {
-        $data      = $this->getReceivePoints($bounds, $city);
-        $terminals = [];
-        if (is_array($data)) {
-            $terminals = array_filter(
-                $data,
-                fn($array) => in_array($array['departmentType'], ['Т', 'СД'])
-            );
-        }
-        return $terminals;
-    }
-
-    /**
-     * Get Delivery Price
-     *
-     * @param \SergeevPasha\DPD\DTO\Delivery $delivery
-     *
-     * @return array|null
-     */
-    public function getPrice(Delivery $delivery): ?array
-    {
-        $soap               = new SoapClient('http://ws.dpd.ru/services/calculator2?wsdl');
+        $soap               = new SoapService($this->url . 'services/calculator2?wsdl');
         $data               = [
             'auth'          => [
                 'clientNumber' => $this->user,
@@ -297,34 +110,38 @@ class DPDClient
         ];
         $data               = DPDHelper::removeNullValues($data);
         $request['request'] = $data;
-        /* @phpstan-ignore-next-line */
-        $result = $soap->getServiceCost2($request);
-        return (array) $result;
+        $result             = $soap->getServiceCost2($request);
+        $options            = !isset($result->return) ? [] : $result->return;
+
+        return new DeliveryPriceOptionDtoCollection(
+            array_map(
+                fn($option) => new DeliveryPriceOptionDto(json_decode(json_encode($option), true)),
+                $options
+            )
+        );
     }
 
     /**
-     * Find track by number
-     *
      * @param string $trackNumber
      *
-     * @return array
+     * @throws \SoapFault
+     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @return \SergeevPasha\DPD\DTO\TrackingDto
      */
-    public function findByTrackNumber(string $trackNumber): array
+    public function findByTrackNumber(string $trackNumber): TrackingDto
     {
-        $soap               = new SoapClient('http://ws.dpd.ru/services/tracing1-1?wsdl');
-        $data               = [
+        $soap                    = new SoapService($this->url . 'services/tracing1-1?wsdl');
+        $data                    = [
             'auth'       => [
                 'clientNumber' => $this->user,
                 'clientKey'    => $this->key
             ],
             'dpdOrderNr' => $trackNumber
         ];
-        $request['request'] = $data;
-        $states             = $soap->getStatesByDPDOrder($request);
+        $states                  = $soap->getStatesByDPDOrder(['request' => $data]);
+        $result                  = !isset($states->return->states) ? [] : end($states->return->states);
+        $result->stateTranslated = trans("dpd::dpd_statuses.$result->newState");
 
-        $result           = end($states->return->states);
-        $result->newState = trans("dpd::dpd_statuses.$result->newState");
-
-        return (array) $result;
+        return new TrackingDto((array) $result);
     }
 }

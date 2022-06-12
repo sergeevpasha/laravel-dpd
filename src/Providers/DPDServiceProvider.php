@@ -58,7 +58,7 @@ class DPDServiceProvider extends ServiceProvider
     /**
      * Routes Configuration
      *
-     * @return array<mixed>
+     * @return array
      */
     protected function routeConfiguration(): array
     {

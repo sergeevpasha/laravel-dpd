@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 use SergeevPasha\DPD\Enum\ServiceType;
 use Spatie\DataTransferObject\DataTransferObject;
 
-class Delivery extends DataTransferObject
+class DeliveryDto extends DataTransferObject
 {
     /**
      * @var int
@@ -68,9 +68,10 @@ class Delivery extends DataTransferObject
     /**
      * From Array.
      *
-     * @param array<mixed> $data
+     * @param array $data
      *
      * @throws \BenSampo\Enum\Exceptions\InvalidEnumKeyException
+     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
      * @return self
      */
     public static function fromArray(array $data): self
@@ -82,9 +83,11 @@ class Delivery extends DataTransferObject
                 'arrivalTerminal'   => (bool) $data['arrival_terminal'],
                 'derivalTerminal'   => (bool) $data['derival_terminal'],
                 'parcelTotalWeight' => (float) $data['parcel_total_weight'],
-                'parcelTotalVolume' => isset($data['parcel_total_volume']) ? (float) $data['parcel_total_volume'] : null,
-                'parcelTotalValue'  => isset($data['parcel_total_value']) ? (float) $data['parcel_total_value'] : null,
-                'pickupDate'        => isset($data['pickup_date']) ? $data['pickup_date'] : null,
+                'parcelTotalVolume' => isset($data['parcel_total_volume']) ?
+                    (float) $data['parcel_total_volume'] : null,
+                'parcelTotalValue'  => isset($data['parcel_total_value']) ?
+                    (float) $data['parcel_total_value'] : null,
+                'pickupDate'        => $data['pickup_date'] ?? null,
                 'maxDeliveryDays'   => isset($data['max_delivery_days']) ? (int) $data['max_delivery_days'] : null,
                 'maxDeliveryPrice'  => isset($data['max_delivery_price']) ? (float) $data['max_delivery_price'] : null,
                 'services'          =>
