@@ -101,16 +101,16 @@ KG - Kyrgyzstan
 
 If you need to specify a service you need to use one of these codes:
 <pre>
-    BZP = '18:00';
-    ECN - ECONOMY
-    ECU - ECONOMY CU
-    CUR - CLASSIC
-    NDY - EXPRESS
-    CSM - Online Express
-    PCL - OPTIMUM
-    PUP - SHOP
-    DPI - CLASSIC international IMPORT
-    DPE - CLASSIC international EXPORT
-    MAX - MAX domestic
-    MXO - Online Max
+BZP = '18:00';
+ECN - ECONOMY
+ECU - ECONOMY CU
+CUR - CLASSIC
+NDY - EXPRESS
+CSM - Online Express
+PCL - OPTIMUM
+PUP - SHOP
+DPI - CLASSIC international IMPORT
+DPE - CLASSIC international EXPORT
+MAX - MAX domestic
+MXO - Online Max
 </pre>
