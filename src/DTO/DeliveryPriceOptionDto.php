@@ -2,43 +2,21 @@
 
 namespace SergeevPasha\DPD\DTO;
 
-use SergeevPasha\DPD\Enum\ServiceType;
 use Spatie\DataTransferObject\DataTransferObject;
+use Spatie\DataTransferObject\Attributes\MapFrom;
 
 class DeliveryPriceOptionDto extends DataTransferObject
 {
-    /**
-     * @var \SergeevPasha\DPD\Enum\ServiceType
-     */
-    public ServiceType $service;
 
-    /**
-     * @var float
-     */
-    public float $cost;
+    #[MapFrom('serviceCode')]
+    public string $serviceCode;
 
-    /**
-     * @var int
-     */
-    public int $days;
+    #[MapFrom('serviceName')]
+    public string $serviceName;
 
-    /**
-     * From Array.
-     *
-     * @param array $data
-     *
-     * @throws \BenSampo\Enum\Exceptions\InvalidEnumKeyException
-     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
-     * @return self
-     */
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            [
-                'service' => ServiceType::fromKey($data['serviceCode']),
-                'cost'    => (float) $data['cost'],
-                'days'    => (int) $data['days'],
-            ]
-        );
-    }
+    #[MapFrom('cost')]
+    public string $cost;
+
+    #[MapFrom('days')]
+    public string $days;
 }

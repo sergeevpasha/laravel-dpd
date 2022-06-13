@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace SergeevPasha\DPD\DTO;
 
-use Illuminate\Support\Str;
-use SergeevPasha\DPD\Enum\ServiceType;
 use Spatie\DataTransferObject\DataTransferObject;
 
 class DeliveryDto extends DataTransferObject
@@ -61,7 +59,7 @@ class DeliveryDto extends DataTransferObject
     public ?float $maxDeliveryPrice;
 
     /**
-     * @var \SergeevPasha\DPD\Enum\ServiceType[]|null
+     * @var array|null
      */
     public ?array $services;
 
@@ -90,10 +88,7 @@ class DeliveryDto extends DataTransferObject
                 'pickupDate'        => $data['pickup_date'] ?? null,
                 'maxDeliveryDays'   => isset($data['max_delivery_days']) ? (int) $data['max_delivery_days'] : null,
                 'maxDeliveryPrice'  => isset($data['max_delivery_price']) ? (float) $data['max_delivery_price'] : null,
-                'services'          =>
-                    isset($data['services']) ?
-                        array_map(fn(string $item) => ServiceType::fromKey(Str::upper($item)), $data['services']) :
-                        null,
+                'services'          => isset($data['services']) ?? []
             ]
         );
     }
