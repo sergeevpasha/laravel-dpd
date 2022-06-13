@@ -88,7 +88,7 @@ class DeliveryDto extends DataTransferObject
                 'pickupDate'        => $data['pickup_date'] ?? null,
                 'maxDeliveryDays'   => isset($data['max_delivery_days']) ? (int) $data['max_delivery_days'] : null,
                 'maxDeliveryPrice'  => isset($data['max_delivery_price']) ? (float) $data['max_delivery_price'] : null,
-                'services'          => isset($data['services']) ?? []
+                'services'          => $data['services'] ?? []
             ]
         );
     }
